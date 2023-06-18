@@ -3,9 +3,10 @@ import ErrorPage from "./ErrorPage.js"
 import LoadingPage from "./LoadingPage.js"
 
 import Actions from './Actions.js'
+import {convertDate} from "../helper/ConvertDate.js";
 
 const row = (bill) => {
-  return (`
+    return (`
     <tr>
       <td>${bill.type}</td>
       <td>${bill.name}</td>
@@ -17,16 +18,22 @@ const row = (bill) => {
       </td>
     </tr>
     `)
-  }
-
+}
 const rows = (data) => {
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+    // return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+    const output = (data && data.length) ? data.sort((a, b) => {
+        return convertDate(b.date) - convertDate(a.date)
+    }).map(bill => row(bill)).join("") : ""
+    // console.log(output)
+
+    return output
 }
 
-export default ({ data: bills, loading, error }) => {
-  
-  const modal = () => (`
-    <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+export default ({data: bills, loading, error}) => {
+
+    // Added a test id for the modal
+    const modal = () => (`
+    <div class="modal fade" id="modaleFile" tabindex="-1"  data-testid={'modaleFile'} role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -42,13 +49,14 @@ export default ({ data: bills, loading, error }) => {
     </div>
   `)
 
-  if (loading) {
-    return LoadingPage()
-  } else if (error) {
-    return ErrorPage(error)
-  }
-  
-  return (`
+    if (loading) {
+        return LoadingPage()
+    }
+    else if (error) {
+        return ErrorPage(error)
+    }
+
+    return (`
     <div class='layout'>
       ${VerticalLayout(120)}
       <div class='content'>
@@ -76,5 +84,5 @@ export default ({ data: bills, loading, error }) => {
       </div>
       ${modal()}
     </div>`
-  )
+    )
 }

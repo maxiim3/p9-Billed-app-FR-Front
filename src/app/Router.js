@@ -1,116 +1,157 @@
+// Import necessary modules
 import store from "./Store.js"
-import Login, { PREVIOUS_LOCATION } from "../containers/Login.js"
-import Bills  from "../containers/Bills.js"
+import Login, {PREVIOUS_LOCATION} from "../containers/Login.js"
+import Bills from "../containers/Bills.js"
 import NewBill from "../containers/NewBill.js"
 import Dashboard from "../containers/Dashboard.js"
-
 import BillsUI from "../views/BillsUI.js"
 import DashboardUI from "../views/DashboardUI.js"
+import {ROUTES, ROUTES_PATH} from "../constants/routes.js"
 
-import { ROUTES, ROUTES_PATH } from "../constants/routes.js"
 
+/**
+ * Initializes the application, sets up routing and views for the current URL
+ * @returns {null}
+ */
 export default () => {
-  const rootDiv = document.getElementById('root')
-  rootDiv.innerHTML = ROUTES({ pathname: window.location.pathname })
+    // Access the root DOM element
+    const rootDiv = document.getElementById('root')
 
-  window.onNavigate = (pathname) => {
+    // Initialize the app view based on the current route
+    rootDiv.innerHTML = ROUTES({pathname: window.location.pathname})
 
-    window.history.pushState(
-      {},
-      pathname,
-      window.location.origin + pathname
-    )
-    if (pathname === ROUTES_PATH['Login']) {
-      rootDiv.innerHTML = ROUTES({ pathname })
-      document.body.style.backgroundColor="#0E5AE5"
-      new Login({ document, localStorage, onNavigate, PREVIOUS_LOCATION, store })
-    } else if (pathname === ROUTES_PATH['Bills']) {
-      rootDiv.innerHTML = ROUTES({ pathname, loading: true })
-      const divIcon1 = document.getElementById('layout-icon1')
-      const divIcon2 = document.getElementById('layout-icon2')
-      divIcon1.classList.add('active-icon')
-      divIcon2.classList.remove('active-icon')
-      const bills = new Bills({ document, onNavigate, store, localStorage  })
-      bills.getBills().then(data => {
-        rootDiv.innerHTML = BillsUI({ data })
-        const divIcon1 = document.getElementById('layout-icon1')
-        const divIcon2 = document.getElementById('layout-icon2')
-        divIcon1.classList.add('active-icon')
-        divIcon2.classList.remove('active-icon')
-        new Bills({ document, onNavigate, store, localStorage })
-      }).catch(error => {
-        rootDiv.innerHTML = ROUTES({ pathname, error })
-      })
-    } else if (pathname === ROUTES_PATH['NewBill']) {
-      rootDiv.innerHTML = ROUTES({ pathname, loading: true })
-      new NewBill({ document, onNavigate, store, localStorage })
-      const divIcon1 = document.getElementById('layout-icon1')
-      const divIcon2 = document.getElementById('layout-icon2')
-      divIcon1.classList.remove('active-icon')
-      divIcon2.classList.add('active-icon')
-    } else if (pathname === ROUTES_PATH['Dashboard']) {
-      rootDiv.innerHTML = ROUTES({ pathname, loading: true })
-      const bills = new Dashboard({ document, onNavigate, store, bills: [], localStorage })
-      bills.getBillsAllUsers().then(bills => {
-          rootDiv.innerHTML = DashboardUI({data: {bills}})
-          new Dashboard({document, onNavigate, store, bills, localStorage})
-        }).catch(error => {
-        rootDiv.innerHTML = ROUTES({ pathname, error })
-      })
-    }
-  }
+    handleNavigation(rootDiv)
 
-  window.onpopstate = (e) => {
-    const user = JSON.parse(localStorage.getItem('user'))
-    if (window.location.pathname === "/" && !user) {
-      document.body.style.backgroundColor="#0E5AE5"
-      rootDiv.innerHTML = ROUTES({ pathname: window.location.pathname })
-    }
-    else if (user) {
-      onNavigate(PREVIOUS_LOCATION)
-    }
-  }
+    getOnpopstate(rootDiv)
 
-  if (window.location.pathname === "/" && window.location.hash === "") {
-    new Login({ document, localStorage, onNavigate, PREVIOUS_LOCATION, store })
-    document.body.style.backgroundColor="#0E5AE5"
-  } else if (window.location.hash !== "") {
-    if (window.location.hash === ROUTES_PATH['Bills']) {
-      rootDiv.innerHTML = ROUTES({ pathname: window.location.hash, loading: true })
-      const divIcon1 = document.getElementById('layout-icon1')
-      const divIcon2 = document.getElementById('layout-icon2')
-      divIcon1.classList.add('active-icon')
-      divIcon2.classList.remove('active-icon')
-      const bills = new Bills({ document, onNavigate, store, localStorage  })
-      bills.getBills().then(data => {
-        rootDiv.innerHTML = BillsUI({ data })
-        const divIcon1 = document.getElementById('layout-icon1')
-        const divIcon2 = document.getElementById('layout-icon2')
-        divIcon1.classList.add('active-icon')
-        divIcon2.classList.remove('active-icon')
-        new Bills({ document, onNavigate, store, localStorage })
-      }).catch(error => {
-        rootDiv.innerHTML = ROUTES({ pathname: window.location.hash, error })
-      })
-    } else if (window.location.hash === ROUTES_PATH['NewBill']) {
-      rootDiv.innerHTML = ROUTES({ pathname: window.location.hash, loading: true })
-      new NewBill({ document, onNavigate, store, localStorage })
-      const divIcon1 = document.getElementById('layout-icon1')
-      const divIcon2 = document.getElementById('layout-icon2')
-      divIcon1.classList.remove('active-icon')
-      divIcon2.classList.add('active-icon')
-    } else if (window.location.hash === ROUTES_PATH['Dashboard']) {
-      rootDiv.innerHTML = ROUTES({ pathname: window.location.hash, loading: true })
-      const bills = new Dashboard({ document, onNavigate, store, bills: [], localStorage })
-      bills.getBillsAllUsers().then(bills => {
-        rootDiv.innerHTML = DashboardUI({ data: { bills } })
-        new Dashboard({ document, onNavigate, store, bills, localStorage })
-      }).catch(error => {
-        rootDiv.innerHTML = ROUTES({ pathname: window.location.hash, error })
-      })
-    }
-  }
+    handlePageLoadAndRefresh(rootDiv);
 
-  return null
+    return null
 }
 
+/**
+ * Handles navigation for single page application. Updates history state
+ * and changes the view based on the given pathname.
+ * @param {string} pathname - The new URL path
+ */
+function handleNavigation(rootDiv) {
+    window.onNavigate = (pathname) => {
+        // Update history state
+        window.history.pushState({}, pathname, window.location.origin + pathname)
+
+        // Route handling logic
+        // Login route
+        if (pathname === ROUTES_PATH['Login']) {
+            // Update view and create new Login container
+            rootDiv.innerHTML = ROUTES({pathname})
+            document.body.style.backgroundColor = "#0E5AE5"
+            new Login({document, localStorage, onNavigate, PREVIOUS_LOCATION, store})
+        }
+        // Bills route
+        else if (pathname === ROUTES_PATH['Bills']) {
+            // Update view, adjust icons and create new Bills container
+            rootDiv.innerHTML = ROUTES({pathname, loading: true})
+            setActiveIcon('layout-icon1')
+            initializeBills(rootDiv, error => {
+                rootDiv.innerHTML = ROUTES({pathname, error})
+            })
+        }
+        // New Bill route
+        else if (pathname === ROUTES_PATH['NewBill']) {
+            // Update view, adjust icons and create new NewBill container
+            rootDiv.innerHTML = ROUTES({pathname, loading: true})
+            new NewBill({document, onNavigate, store, localStorage})
+            setActiveIcon('layout-icon2')
+        }
+        // Dashboard route
+        else if (pathname === ROUTES_PATH['Dashboard']) {
+            // Update view and create new Dashboard container
+            rootDiv.innerHTML = ROUTES({pathname, loading: true})
+            initializeDashboardUI(rootDiv, error => {
+                                      rootDiv.innerHTML = ROUTES({pathname, error})
+                                  }
+            );
+        }
+    };
+}
+
+/**
+ * Handles popstate events, adjusts the view based on whether a user is logged in
+ */
+function getOnpopstate(rootDiv) {
+    window.onpopstate = (e) => {
+        const user = JSON.parse(localStorage.getItem('user'))
+        if (window.location.pathname === "/" && !user) {
+            document.body.style.backgroundColor = "#0E5AE5"
+            rootDiv.innerHTML = ROUTES({pathname: window.location.pathname})
+        }
+        else if (user) {
+            onNavigate(PREVIOUS_LOCATION)
+        }
+    };
+}
+
+function handlePageLoadAndRefresh(rootDiv) {
+    // Handle page refresh or initial page load
+    if (window.location.pathname === "/" && window.location.hash === "") {
+        // Create new Login container if there is no hash
+        new Login({document, localStorage, onNavigate, PREVIOUS_LOCATION, store})
+        document.body.style.backgroundColor = "#0E5AE5"
+    }
+    else if (window.location.hash !== "") {
+        // Handle different hashes (routes) as necessary
+        if (window.location.hash === ROUTES_PATH['Bills']) {
+            // Create new Bills container if hash is '#Bills'
+            rootDiv.innerHTML = ROUTES({pathname: window.location.hash, loading: true})
+            setActiveIcon('layout-icon1')
+            initializeBills(rootDiv, error => {
+                rootDiv.innerHTML = ROUTES({pathname: window.location.hash, error})
+            })
+        }
+        else if (window.location.hash === ROUTES_PATH['NewBill']) {
+            // Create new NewBill container if hash is '#NewBill'
+            rootDiv.innerHTML = ROUTES({pathname: window.location.hash, loading: true})
+            new NewBill({document, onNavigate, store, localStorage})
+            setActiveIcon('layout-icon2')
+        }
+        else if (window.location.hash === ROUTES_PATH['Dashboard']) {
+            // Create new Dashboard container if hash is '#Dashboard'
+            rootDiv.innerHTML = ROUTES({pathname: window.location.hash, loading: true})
+            initializeDashboardUI(rootDiv, error => {
+                                      rootDiv.innerHTML = ROUTES({pathname: window.location.hash, error})
+                                  }
+            )
+        }
+    }
+}
+
+function initializeBills(rootDiv, errorReturnStatement) {
+    const bills = new Bills({document, onNavigate, store, localStorage})
+    bills.getBills().then(data => {
+        rootDiv.innerHTML = BillsUI({data})
+        setActiveIcon('layout-icon1')
+        new Bills({document, onNavigate, store, localStorage})
+    }).catch(errorReturnStatement)
+}
+
+function setActiveIcon(activeIcon) {
+    const divIcon1 = document.getElementById('layout-icon1')
+    const divIcon2 = document.getElementById('layout-icon2')
+    switch (activeIcon) {
+        case 'layout-icon1' :
+            divIcon1.classList.add('active-icon')
+            divIcon2.classList.remove('active-icon')
+            break;
+        case 'layout-icon2' :
+            divIcon1.classList.remove('active-icon')
+            divIcon2.classList.add('active-icon')
+    }
+}
+
+function initializeDashboardUI(rootDiv, errorReturnStatement) {
+    const bills = new Dashboard({document, onNavigate, store, bills: [], localStorage})
+    bills.getBillsAllUsers().then(bills => {
+        rootDiv.innerHTML = DashboardUI({data: {bills}})
+        new Dashboard({document, onNavigate, store, bills, localStorage})
+    }).catch(errorReturnStatement)
+}

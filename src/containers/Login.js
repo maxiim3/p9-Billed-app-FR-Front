@@ -3,6 +3,23 @@ import { ROUTES_PATH } from '../constants/routes.js'
 export let PREVIOUS_LOCATION = ''
 
 // we use a class so as to test its methods in e2e tests
+
+
+
+/**
+ * This Login class handles the login functionality for both `Employee` and `Admin` users.
+ *
+ * @property {Object} document - The global document object.
+ * @property {Storage} localStorage - The global localStorage object.
+ * @property {function} onNavigate - A function to handle navigation.
+ * @property {string} PREVIOUS_LOCATION - A string storing the previous navigated route.
+ * @property {Object} store - An object to interact with the user store (for login, user creation).
+ *
+ * @method handleSubmitEmployee - Handles the form submission for `Employee` users.
+ * @method handleSubmitAdmin - Handles the form submission for `Admin` users.
+ * @method login - Logs in a user with the provided user data.
+ * @method createUser - Tries to create a new user with the provided user data.
+ */
 export default class Login {
   constructor({ document, localStorage, onNavigate, PREVIOUS_LOCATION, store }) {
     this.document = document
@@ -45,6 +62,7 @@ export default class Login {
       password: e.target.querySelector(`input[data-testid="employee-password-input"]`).value,
       status: "connected"
     }
+    console.log(user)
     this.localStorage.setItem("user", JSON.stringify(user))
     this.login(user)
       .catch(
