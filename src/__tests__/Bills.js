@@ -6,36 +6,30 @@ import {screen, waitFor} from "@testing-library/dom"
 import BillsUI from "../views/BillsUI.js"
 import {bills} from "../fixtures/bills.js"
 import {ROUTES_PATH} from "../constants/routes.js";
-import {localStorageMock} from "../__mocks__/localStorage.js";
-
-import router from "../app/Router.js";
 import userEvent from "@testing-library/user-event";
 import Bills from "../containers/Bills.js";
 import store from "../__mocks__/store.js";
 import {convertDate} from "../helper/ConvertDate.js";
+import {connectAsEmployee} from "../helper/connectAsEmployee.js";
+import {loadEmployeesRoutes} from "../helper/loadEmployeesRoutes.js";
 
-const mockBills = jest.mock('../containers/Bills.js')
+// const mockBills = jest.mock('../containers/Bills.js')
 
-
-export async function connectAsEmployee() {
-    Object.defineProperty(window, 'localStorage', {value: localStorageMock})
-    window.localStorage.setItem('user', JSON.stringify({type: "Employee"}))
-}
-
-export async function loadRoutes(path) {
+// Mock a connection as an employee before each test
+beforeEach(async () => {
     await connectAsEmployee()
-    const root = document.createElement("div")
-    root.setAttribute("id", "root")
-    document.body.append(root)
+})
 
-    router()
-    window.onNavigate(path)
-}
+// Clear all mocks after each test
+afterEach(() => {
+    jest.clearAllMocks()
+})
 
 describe("Given I am connected as an employee", () => {
     describe("When I am on Bills Page", () => {
+
         test("Then bill icon in vertical layout should be highlighted", async () => {
-            await loadRoutes(ROUTES_PATH.Bills)
+            await loadEmployeesRoutes(ROUTES_PATH.Bills)
             await waitFor(() => screen.getByTestId('icon-window'))
             const windowIcon = screen.getByTestId('icon-window')
             expect(windowIcon.classList).toContain('active-icon')
@@ -43,8 +37,12 @@ describe("Given I am connected as an employee", () => {
         })
 
         test("Then bills should be ordered from earliest to latest", () => {
-            document.body.innerHTML = BillsUI({data: bills})
-            const dates = screen.getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
+            document.body.innerHTML = BillsUI({ data: bills });
+      const dates = screen
+        .getAllByText(
+          /^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i
+        )
+        .map((a) => a.innerHTML);
             const antiChronoV1 = (a, b) => (convertDate(b) - convertDate(b))
 
             const datesSorted = [...dates].sort(antiChronoV1)
@@ -52,7 +50,6 @@ describe("Given I am connected as an employee", () => {
         })
 
         test("Then the table should have as much tableRows as mocked data", async () => {
-            await connectAsEmployee()
             document.body.innerHTML = BillsUI({data: bills, error: false, loading: false})
             await waitFor(() => screen.getByTestId('tbody'))
             const tBody = screen.getByTestId('tbody')
@@ -61,12 +58,11 @@ describe("Given I am connected as an employee", () => {
         })
         describe('I click the button to create a New Bill', () => {
             test('Then I navigate to /#employee/bill/new', async () => {
-                await connectAsEmployee()
                 document.body.innerHTML = await BillsUI({data: bills, error: false, loading: false})
 
                 await waitFor(() => screen.getByTestId("btn-new-bill"))
                 const btn = screen.getByTestId("btn-new-bill")
-                const mockFn = jest.fn(async () => await loadRoutes(ROUTES_PATH.NewBill))
+                const mockFn = jest.fn(async () => await loadEmployeesRoutes(ROUTES_PATH.NewBill))
                 btn.onclick = () => mockFn()
 
                 await userEvent.click(btn)
@@ -76,7 +72,6 @@ describe("Given I am connected as an employee", () => {
         })
         describe('When I am on Bills page, and I call handleClickNewBill from container/Bills', () => {
             test('Then I navigate to /#employee/bill/new', async () => {
-                await loadRoutes(ROUTES_PATH.Bills)
                 const onNavigate = () => window.onNavigate(ROUTES_PATH['NewBill'])
                 const containerBills = new Bills({document, onNavigate, store, localStorage})
                 jest.mock("../containers/Bills.js")
@@ -88,7 +83,7 @@ describe("Given I am connected as an employee", () => {
         describe('I click on the eye of a bill', () => {
             test('the modal opens', async () => {
                 // Load the Bills page
-                await loadRoutes(ROUTES_PATH.Bills)
+                await loadEmployeesRoutes(ROUTES_PATH.Bills)
 
                 // Create the Bills UI
                 document.body.innerHTML = await BillsUI({data: bills, error: false, loading: false})

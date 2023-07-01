@@ -20,13 +20,14 @@ const row = (bill) => {
     `)
 }
 const rows = (data) => {
-    // return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
-    const output = (data && data.length) ? data.sort((a, b) => {
-        return convertDate(b.date) - convertDate(a.date)
-    }).map(bill => row(bill)).join("") : ""
-    // console.log(output)
+    if (!(data && data.length)) {
+        return "";
+    }
+    let sorted = data.sort((a, b) => convertDate(b.date).getFullYear() - convertDate(a.date).getFullYear());
 
-    return output
+  
+    // let sorted = data.sort((a, b) => b.date - a.date);
+    return sorted.map(bill => row(bill)).join("");
 }
 
 export default ({data: bills, loading, error}) => {
@@ -51,8 +52,7 @@ export default ({data: bills, loading, error}) => {
 
     if (loading) {
         return LoadingPage()
-    }
-    else if (error) {
+    } else if (error) {
         return ErrorPage(error)
     }
 
@@ -86,3 +86,4 @@ export default ({data: bills, loading, error}) => {
     </div>`
     )
 }
+

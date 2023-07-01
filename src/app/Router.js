@@ -30,9 +30,9 @@ export default () => {
 }
 
 /**
- * Handles navigation for single page application. Updates history state
- * and changes the view based on the given pathname.
- * @param {string} pathname - The new URL path
+ * Handles navigation for single page application.
+ * It updates the history state and changes the view based on the given pathname.
+ * @param {Object} rootDiv - Root DOM element
  */
 function handleNavigation(rootDiv) {
     window.onNavigate = (pathname) => {
@@ -76,7 +76,8 @@ function handleNavigation(rootDiv) {
 }
 
 /**
- * Handles popstate events, adjusts the view based on whether a user is logged in
+ * Handles popstate events, adjusts the view based on whether a user is logged in.
+ * @param {Object} rootDiv - Root DOM element
  */
 function getOnpopstate(rootDiv) {
     window.onpopstate = (e) => {
@@ -90,7 +91,11 @@ function getOnpopstate(rootDiv) {
         }
     };
 }
-
+/**
+ * Handles page load and page refresh events.
+ * It sets up the correct page view based on the URL and hash.
+ * @param {Object} rootDiv - Root DOM element
+ */
 function handlePageLoadAndRefresh(rootDiv) {
     // Handle page refresh or initial page load
     if (window.location.pathname === "/" && window.location.hash === "") {
@@ -124,7 +129,12 @@ function handlePageLoadAndRefresh(rootDiv) {
         }
     }
 }
-
+/**
+ * Initializes the Bills view.
+ * It fetches the bills data, renders the Bills UI, and initializes the Bills container.
+ * @param {Object} rootDiv - Root DOM element
+ * @param {function} errorReturnStatement - Function to execute on data fetch error
+ */
 function initializeBills(rootDiv, errorReturnStatement) {
     const bills = new Bills({document, onNavigate, store, localStorage})
     bills.getBills().then(data => {
@@ -133,7 +143,10 @@ function initializeBills(rootDiv, errorReturnStatement) {
         new Bills({document, onNavigate, store, localStorage})
     }).catch(errorReturnStatement)
 }
-
+/**
+ * Sets the active icon based on the current view.
+ * @param {string} activeIcon - The ID of the icon to be set as active
+ */
 function setActiveIcon(activeIcon) {
     const divIcon1 = document.getElementById('layout-icon1')
     const divIcon2 = document.getElementById('layout-icon2')
@@ -147,7 +160,12 @@ function setActiveIcon(activeIcon) {
             divIcon2.classList.add('active-icon')
     }
 }
-
+/**
+ * Initializes the Dashboard view.
+ * It fetches all bills data, renders the Dashboard UI, and initializes the Dashboard container.
+ * @param {Object} rootDiv - Root DOM element
+ * @param {function} errorReturnStatement - Function to execute on data fetch error
+ */
 function initializeDashboardUI(rootDiv, errorReturnStatement) {
     const bills = new Dashboard({document, onNavigate, store, bills: [], localStorage})
     bills.getBillsAllUsers().then(bills => {

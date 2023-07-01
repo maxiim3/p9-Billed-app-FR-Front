@@ -1,9 +1,18 @@
-
+/**
+ * Checks if the response is OK (status in the range 200-299).
+ * If not, it throws an error with the response message.
+ * If the response is OK, it parses it as JSON.
+ * @param {Response} response - The response object to check
+ * @returns {Promise<any>} A promise that resolves with the response data
+ */
 const jsonOrThrowIfError = async (response) => {
   if(!response.ok) throw new Error((await response.json()).message)
   return response.json()
 }
-
+/**
+ * Class representing an API.
+ * This class includes methods for performing GET, POST, DELETE, and PATCH requests.
+ */
 class Api {
   constructor({baseUrl}) {
     this.baseUrl = baseUrl;
@@ -21,7 +30,12 @@ class Api {
     return jsonOrThrowIfError(await fetch(`${this.baseUrl}${url}`, {headers, method: 'PATCH', body: data}))
   }
 }
-
+/**
+ * Builds headers for an HTTP request.
+ * Adds 'Content-Type: application/json' and 'Authorization: Bearer {jwt}' if not specified otherwise.
+ * @param {Object} headers - The headers to include in the request
+ * @returns {Object} The headers for the request
+ */
 const getHeaders = (headers) => {
   const h = { }
   if (!headers.noContentType) h['Content-Type'] = 'application/json'
@@ -29,7 +43,10 @@ const getHeaders = (headers) => {
   if (jwt && !headers.noAuthorization) h['Authorization'] = `Bearer ${jwt}`
   return {...h, ...headers}
 }
-
+/**
+ * Class representing an entity in the API.
+ * This class includes methods for performing select, list, update, create, and delete operations on the entity.
+ */
 class ApiEntity {
   constructor({key, api}) {
     this.key = key;
@@ -53,7 +70,12 @@ class ApiEntity {
 }
 
 
-
+/**
+ * Builds headers for an HTTP request.
+ * Adds 'Content-Type: application/json' and 'Authorization: Bearer {jwt}' if not specified otherwise.
+ * @param {Object} headers - The headers to include in the request
+ * @returns {Object} The headers for the request
+ */
 class Store {
   constructor() {
     this.api = new Api({baseUrl: 'http://localhost:5678'})

@@ -18,7 +18,9 @@ export const convertDate = (dateStr) => {
     let [day, month, year] = dateStr.split(' ');
     if (!day || !month || !year) throw new Error('Parameter does not match the required date format')
 
-    month = months[month];
-    return new Date(`${month} ${day}, ${year}`);
+    if (!months[month]) return new Date(`${month} ${day}, ${year}`);
+
+    const convertedMonth = months[month];
+    return new Date(`${convertedMonth} ${day}, ${year}`);
 
 }
