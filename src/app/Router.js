@@ -68,8 +68,8 @@ function handleNavigation(rootDiv) {
             // Update view and create new Dashboard container
             rootDiv.innerHTML = ROUTES({pathname, loading: true})
             initializeDashboardUI(rootDiv, error => {
-                                      rootDiv.innerHTML = ROUTES({pathname, error})
-                                  }
+                    rootDiv.innerHTML = ROUTES({pathname, error})
+                }
             );
         }
     };
@@ -85,12 +85,12 @@ function getOnpopstate(rootDiv) {
         if (window.location.pathname === "/" && !user) {
             document.body.style.backgroundColor = "#0E5AE5"
             rootDiv.innerHTML = ROUTES({pathname: window.location.pathname})
-        }
-        else if (user) {
+        } else if (user) {
             onNavigate(PREVIOUS_LOCATION)
         }
     };
 }
+
 /**
  * Handles page load and page refresh events.
  * It sets up the correct page view based on the URL and hash.
@@ -102,8 +102,7 @@ function handlePageLoadAndRefresh(rootDiv) {
         // Create new Login container if there is no hash
         new Login({document, localStorage, onNavigate, PREVIOUS_LOCATION, store})
         document.body.style.backgroundColor = "#0E5AE5"
-    }
-    else if (window.location.hash !== "") {
+    } else if (window.location.hash !== "") {
         // Handle different hashes (routes) as necessary
         if (window.location.hash === ROUTES_PATH['Bills']) {
             // Create new Bills container if hash is '#Bills'
@@ -112,23 +111,22 @@ function handlePageLoadAndRefresh(rootDiv) {
             initializeBills(rootDiv, error => {
                 rootDiv.innerHTML = ROUTES({pathname: window.location.hash, error})
             })
-        }
-        else if (window.location.hash === ROUTES_PATH['NewBill']) {
+        } else if (window.location.hash === ROUTES_PATH['NewBill']) {
             // Create new NewBill container if hash is '#NewBill'
             rootDiv.innerHTML = ROUTES({pathname: window.location.hash, loading: true})
             new NewBill({document, onNavigate, store, localStorage})
             setActiveIcon('layout-icon2')
-        }
-        else if (window.location.hash === ROUTES_PATH['Dashboard']) {
+        } else if (window.location.hash === ROUTES_PATH['Dashboard']) {
             // Create new Dashboard container if hash is '#Dashboard'
             rootDiv.innerHTML = ROUTES({pathname: window.location.hash, loading: true})
             initializeDashboardUI(rootDiv, error => {
-                                      rootDiv.innerHTML = ROUTES({pathname: window.location.hash, error})
-                                  }
+                    rootDiv.innerHTML = ROUTES({pathname: window.location.hash, error})
+                }
             )
         }
     }
 }
+
 /**
  * Initializes the Bills view.
  * It fetches the bills data, renders the Bills UI, and initializes the Bills container.
@@ -136,6 +134,7 @@ function handlePageLoadAndRefresh(rootDiv) {
  * @param {function} errorReturnStatement - Function to execute on data fetch error
  */
 function initializeBills(rootDiv, errorReturnStatement) {
+    // console.log("Router/initializeBills : initializeBills from Router has been called") // debug
     const bills = new Bills({document, onNavigate, store, localStorage})
     bills.getBills().then(data => {
         rootDiv.innerHTML = BillsUI({data})
@@ -143,6 +142,7 @@ function initializeBills(rootDiv, errorReturnStatement) {
         new Bills({document, onNavigate, store, localStorage})
     }).catch(errorReturnStatement)
 }
+
 /**
  * Sets the active icon based on the current view.
  * @param {string} activeIcon - The ID of the icon to be set as active
@@ -160,6 +160,7 @@ function setActiveIcon(activeIcon) {
             divIcon2.classList.add('active-icon')
     }
 }
+
 /**
  * Initializes the Dashboard view.
  * It fetches all bills data, renders the Dashboard UI, and initializes the Dashboard container.

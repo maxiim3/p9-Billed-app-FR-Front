@@ -76,8 +76,6 @@ export default class {
         $('#arrow-icon2').click((e) => this.handleShowTickets(e, bills, 2))
         $('#arrow-icon3').click((e) => this.handleShowTickets(e, bills, 3))
         new Logout({localStorage, onNavigate})
-        this.bills = bills
-        this.observeTicketContainer()
     }
 
     handleClickIconEye = () => {
@@ -91,11 +89,29 @@ export default class {
         if (typeof $modaleFileAdmin1.modal === 'function') $modaleFileAdmin1.modal('show')
     }
 
-    handleEditTicket(e, bill) {
-        $('.dashboard-right-container div').html(DashboardFormUI(bill))
-        $('.vertical-navbar').css({height: '150vh'})
+    handleEditTicket(e, bill, bills) {
+        if (this.counter === undefined || this.id !== bill.id) this.counter = 0
+        if (this.id === undefined || this.id !== bill.id) this.id = bill.id
+        if (this.counter % 2 === 0) {
+            bills.forEach(b => {
+                $(`#open-bill${b.id}`).css({background: '#0D5AE5'})
+            })
+            $(`#open-bill${bill.id}`).css({background: '#2A2B35'})
+            $('.dashboard-right-container div').html(DashboardFormUI(bill))
+            $('.vertical-navbar').css({height: '150vh'})
+            this.counter++
+        } else {
+            $(`#open-bill${bill.id}`).css({background: '#0D5AE5'})
+
+            $('.dashboard-right-container div').html(`
+        <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
+      `)
+            $('.vertical-navbar').css({height: '120vh'})
+            this.counter++
+        }
         $('#icon-eye-d').click(this.handleClickIconEye)
         $('#btn-accept-bill').click((e) => this.handleAcceptSubmit(e, bill))
+        $('#btn-refuse-bill').click((e) => this.handleRefuseSubmit(e, bill))
     }
 
     handleAcceptSubmit = (e, bill) => {
@@ -119,96 +135,31 @@ export default class {
     }
 
     handleShowTickets(e, bills, index) {
-        // SET CURRENT CONTAINER INDEX TO INDEX OF CLICKED ARROW-ICON
+        if (this.counter === undefined || this.index !== index) this.counter = 0
         if (this.index === undefined || this.index !== index) this.index = index
-
-        // GET CURRENT STATE
-        const selector = `status-bills-container${index}`
-        const currentContainer = document.getElementById(CSS.escape(selector))
-        const containerIsOpen = currentContainer.dataset.open
-        console.log(currentContainer)
-
-        switch (containerIsOpen) {
-            case "false":
-                currentContainer.dataset.open = "true"
-                return this.openContainer(index)
-            case "true":
-                currentContainer.dataset.open = "false"
-                return this.closeContainer(index)
+        if (this.counter % 2 === 0) {
+            $(`#arrow-icon${this.index}`).css({transform: 'rotate(0deg)'})
+            $(`#status-bills-container${this.index}`)
+                .html(cards(filteredBills(bills, getStatus(this.index))))
+            this.counter++
+        } else {
+            $(`#arrow-icon${this.index}`).css({transform: 'rotate(90deg)'})
+            $(`#status-bills-container${this.index}`)
+                .html("")
+            this.counter++
         }
-        return this.bills
 
+        bills.forEach(bill => {
+            const billElement = $(`#open-bill${bill.id}`);
 
-    }
-
-    openContainer(index) {
-        console.log(index)
-        $(`#arrow-icon${index}`).css({transform: 'rotate(0deg)'})
-        $(`#status-bills-container${index}`).html(cards(filteredBills(this.bills, getStatus(index))))
-    }
-
-    closeContainer(index) {
-        $(`#arrow-icon${index}`).css({transform: 'rotate(90deg)'})
-        $(`#status-bills-container${index}`).html("")
-    }
-
-    resetAllBillsState() {
-        const displayedBills = [...document.querySelectorAll('.bill-card')]
-        displayedBills.forEach(other => {
-            other.dataset.selected = "false"
-            other.style.backgroundColor = "#0D5AE5"
+            billElement.off('click'); // remove all previous event listeners with off() jQwery method
+            billElement.click((e) => this.handleEditTicket(e, bill, bills))
         })
+
+        return bills
+
     }
 
-    resetRightContainer() {
-        console.log("reset")
-        $('.dashboard-right-container div').html(`
-        <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
-      `)
-        $('.vertical-navbar').css({height: '120vh'})
-    }
-
-    observeTicketContainer() {
-        const containers = [...document.querySelectorAll(".status-bills-container")]
-        const observer = new MutationObserver(mutations => this.mutationCallBack(mutations, containers))
-        containers.forEach(container => observer.observe(container, {subtree: true, attributes: true}))
-    }
-
-    mutationCallBack(mutations, containers) {
-        // Select parent
-        if (mutations[0].attributeName === "data-open") {
-            const container = mutations[0].target
-            const aContainerIsOpen = containers.some(container => container.dataset.open === "true")
-
-            if (!aContainerIsOpen) this.resetRightContainer()
-            else {
-                const displayedBills = [...document.querySelectorAll('.bill-card')]
-                displayedBills.every(bill => bill.dataset.selected === "false") && this.resetRightContainer()
-                displayedBills.forEach(bill => {
-                    bill.onclick = (e) => {
-                        const $b = document.getElementById(bill.id)
-
-                        if ($b.dataset.selected === "false") {
-                            this.resetAllBillsState()
-                            $b.dataset.selected = "true"
-                            $b.style.backgroundColor = "#2A2B35"
-                            const billId = $b.id.split('open-bill')[1]
-                            const data = this.bills.find(({id}) => id === billId)
-                            this.handleEditTicket(e, data)
-                        } else if ($b.dataset.selected === "true") {
-                            this.resetAllBillsState()
-                            this.resetRightContainer()
-                        }
-                    }
-                })
-            }
-        }
-        // // Select Children
-        // else if (mutations[0].attributeName === "data-selected") {
-        //     const allBills = mutations.filter(mutation => mutation.attributeName === "data-selected")
-        //     console.log(allBills)
-        // }
-    }
 
     getBillsAllUsers = () => {
         if (this.store) {

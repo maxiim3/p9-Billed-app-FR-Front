@@ -10,6 +10,7 @@ import {localStorageMock} from "../__mocks__/localStorage.js";
  * @return {Promise<void>}
  */
 export async function connectAsEmployee() {
+    // console.log("connected") // debug
     Object.defineProperty(window, 'localStorage', {value: localStorageMock})
     window.localStorage.setItem('user', JSON.stringify({
         type: "Employee",

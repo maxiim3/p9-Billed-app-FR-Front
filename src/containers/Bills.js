@@ -2,7 +2,6 @@ import {ROUTES_PATH} from '../constants/routes.js'
 import {formatDate, formatStatus} from "../app/format.js"
 import Logout from "./Logout.js"
 
-// Define the main class for this module
 export default class {
     /**
      * Constructor for the class.
@@ -25,6 +24,7 @@ export default class {
         })
         new Logout({document, localStorage, onNavigate})
     }
+
     /**
      * Handles the click event for the new bill button.
      * Navigates to the NewBill page.
@@ -54,11 +54,13 @@ export default class {
      */
     getBills = () => {
         if (this.store) {
+            // console.log("Container/Bills.js - getBills() has been called") // debug
             return this.store
                 .bills()
                 .list()
                 .then(snapshot => {
                     const bills = snapshot
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
                         .map(doc => {
                             try {
                                 return {

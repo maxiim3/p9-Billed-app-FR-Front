@@ -3,7 +3,6 @@ import ErrorPage from "./ErrorPage.js"
 import LoadingPage from "./LoadingPage.js"
 
 import Actions from './Actions.js'
-import {convertDate} from "../helper/ConvertDate.js";
 
 const row = (bill) => {
     return (`
@@ -19,16 +18,16 @@ const row = (bill) => {
     </tr>
     `)
 }
-const rows = (data) => {
-    if (!(data && data.length)) {
-        return "";
-    }
-    let sorted = data.sort((a, b) => convertDate(b.date).getFullYear() - convertDate(a.date).getFullYear());
 
-  
-    // let sorted = data.sort((a, b) => b.date - a.date);
-    return sorted.map(bill => row(bill)).join("");
+const rows = (data) => {
+    return (data && data.length)
+        ? data
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .map(bill => row(bill))
+            .join("")
+        : ""
 }
+
 
 export default ({data: bills, loading, error}) => {
 
@@ -86,4 +85,3 @@ export default ({data: bills, loading, error}) => {
     </div>`
     )
 }
-

@@ -1,8 +1,8 @@
-import {ROUTES_PATH} from '../constants/routes.js'
+import { ROUTES_PATH } from '../constants/routes.js'
 import Logout from "./Logout.js"
 
 export default class NewBill {
-    constructor({document, onNavigate, store, localStorage}) {
+    constructor({ document, onNavigate, store, localStorage }) {
         this.document = document
         this.onNavigate = onNavigate
         this.store = store
@@ -13,7 +13,7 @@ export default class NewBill {
         this.fileUrl = null
         this.fileName = null
         this.billId = null
-        new Logout({document, localStorage, onNavigate})
+        new Logout({ document, localStorage, onNavigate })
     }
 
     /**
@@ -50,25 +50,25 @@ export default class NewBill {
             if (!isValidFile) return
 
             // const updatedFile = {...file, fileName: fileName + }
-            const formData = new FormData()
+        const formData = new FormData()
             console.log(file)
-            const email = JSON.parse(localStorage.getItem("user")).email
-            formData.append('file', file)
-            formData.append('email', email)
+        const email = JSON.parse(localStorage.getItem("user")).email
+        formData.append('file', file)
+        formData.append('email', email)
 
-            this.store
-                .bills()
-                .create({
-                    data: formData,
-                    headers: {
-                        noContentType: true
-                    }
-                })
+        this.store
+            .bills()
+            .create({
+                data: formData,
+                headers: {
+                    noContentType: true
+                }
+            })
                 .then((FormData) => {
                     this.billId = FormData.key
                     this.fileUrl = formData.filePath
                     this.fileName = FormData.fileName
-                }).catch(error => console.error(error))
+            }).catch(error => console.error(error))
         } catch (err) {
             const parentDiv = e.srcElement.parentElement
             const errorMessage = err
@@ -81,7 +81,7 @@ export default class NewBill {
             e.target.value = ""
 
             // console.error(err)
-        }
+    }
     }
     handleSubmit = e => {
         e.preventDefault()
@@ -90,9 +90,9 @@ export default class NewBill {
         const bill = {
             email,
             type: e.target.querySelector(`select[data-testid="expense-type"]`).value,
-            name: e.target.querySelector(`input[data-testid="expense-name"]`).value,
+            name:  e.target.querySelector(`input[data-testid="expense-name"]`).value,
             amount: parseInt(e.target.querySelector(`input[data-testid="amount"]`).value),
-            date: e.target.querySelector(`input[data-testid="datepicker"]`).value,
+            date:  e.target.querySelector(`input[data-testid="datepicker"]`).value,
             vat: e.target.querySelector(`input[data-testid="vat"]`).value,
             pct: parseInt(e.target.querySelector(`input[data-testid="pct"]`).value) || 20,
             commentary: e.target.querySelector(`textarea[data-testid="commentary"]`).value,
