@@ -1,60 +1,183 @@
-import { ROUTES_PATH } from '../constants/routes.js'
+import {ROUTES_PATH} from '../constants/routes.js'
 import Logout from "./Logout.js"
 
+/**
+ * # NewBill
+ * @description This class represents a new bill in the system.
+ * @property {Object} document - The document object from the DOM.
+ * @property {Function} onNavigate - A function used to navigate within the app.
+ * @property {Object} store - The store object to manage data.
+ * @property {string} fileUrl - The URL of the file uploaded.
+ * @property {string} fileName - The name of the file uploaded.
+ * @property {string} billId - The unique ID of the bill.
+ */
 export default class NewBill {
-    constructor({ document, onNavigate, store, localStorage }) {
+    /**
+     * # constructor
+     * @description Initializes a new instance of the NewBill class.
+     * @param {Object} params - The initialization parameters.
+     * @param {Object} params.document - The document object from the DOM.
+     * @param {Function} params.onNavigate - A function used to navigate within the app.
+     * @param {Object} params.store - The store object to manage data.
+     * @param {Object} params.localStorage - The local storage to manage persistent data.
+     */
+    constructor({document, onNavigate, store, localStorage}) {
         this.document = document
         this.onNavigate = onNavigate
         this.store = store
-        const formNewBill = this.document.querySelector(`form[data-testid="form-new-bill"]`)
-        formNewBill.addEventListener("submit", this.handleSubmit)
-        const file = this.document.querySelector(`input[data-testid="file"]`)
-        file.addEventListener("change", this.handleChangeFile)
         this.fileUrl = null
         this.fileName = null
         this.billId = null
-        new Logout({ document, localStorage, onNavigate })
+        this.initForm(document, localStorage, onNavigate); // 👈 Extracted initialization to separate function
     }
 
     /**
-     * # is valid extension
-     * @description check if the file extension is valid
-     * @param fileType: string
-     * @returns {boolean}
-     * @throws {Error} if the file extension is not valid
+     * # initForm
+     * @description Initializes the form by attaching the appropriate event listeners.
+     * @param {Object} document - The document object from the DOM.
+     * @param {Object} localStorage - The local storage to manage persistent data.
+     * @param {Function} onNavigate - A function used to navigate within the app.
+     * @dependency constructor
      */
-    isValidExtension(fileType) {
+    initForm(document, localStorage, onNavigate) {
+        const formNewBill = document.querySelector(`form[data-testid="form-new-bill"]`);
+        formNewBill.addEventListener("submit", this.handleSubmit);
+        const file = document.querySelector(`input[data-testid="file"]`);
+        file.addEventListener("change", this.handleChangeFile);
+        new Logout({document, localStorage, onNavigate});
+    }
 
-        if (typeof fileType !== 'string')
-            throw new Error('extension is not type of string')
-        else if (!fileType.includes("image"))
-            throw new Error("the uploaded file must be an image of type jps, jpeg or png")
-        else {
-            let extension = fileType?.split('/')[1]
-            let validExtensions = ['jpg', 'jpeg', 'png']
+    /**
+     * # handleChangeFile
+     * @description Handles the event of a file change.
+     * @param {Object} event - The event object.
+     * @dependency initForm, removeExistingMessage, isValidFileType, handleValidFile, handleInvalidFile, uploadFile
+     * @return void
+     * @example handleChangeFile(event)
+     */
+    handleChangeFile = (event) => {
+        event.preventDefault();
+        const file = event.target.files[0];
+        const fileName = file.name;
+        const fileExtension = fileName.split('.').pop().toLowerCase();
 
-            if (validExtensions.includes(extension)) return true
+        const parentElement = event.target.parentNode;
+        this.removeExistingMessage(parentElement);  // 👈 Extracted logic to separate function
 
-            throw new Error('The image must be of type jpg, jpeg or png')
+        if (this.isValidFileType(fileExtension)) {
+            this.handleValidFile(parentElement, fileName); // 👈 Extracted logic to separate function
+        } else {
+            this.handleInvalidFile(parentElement, fileExtension); // 👈 Extracted logic to separate function
+        }
+
+        this.uploadFile(file, fileName); // 👈 Extracted logic to separate function
+    }
+
+    /**
+     * # removeExistingMessage
+     * @description Removes any existing validation message.
+     * @param {Object} parentElement - The parent element of the validation message.
+     * @dependency handleChangeFile
+     * @return void
+     * @example removeExistingMessage(parentElement)
+     */
+    removeExistingMessage(parentElement) {
+        const existingMessage = parentElement.querySelector('.file-type-info');
+        if (existingMessage) {
+            parentElement.removeChild(existingMessage);
         }
     }
 
-    handleChangeFile = e => {
-        e.preventDefault()
-        const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
-        const fileName = file.name
-        try {
 
-            const isValidFile = this.isValidExtension(file.type)
+    /**
+     * # isValidFileType
+     * @description Checks if the file type is valid.
+     * @param {string} fileExtension - The file extension.
+     * @dependency handleChangeFile
+     * @return {boolean} Whether the file type is valid.
+     * @example isValidFileType('jpg')
+     */
+    isValidFileType(fileExtension) {
+        return ['jpg', 'jpeg', 'png'].includes(fileExtension);
+    }
 
-            if (!isValidFile) return
+    /**
+     * # handleValidFile
+     * @description Handles the event of a valid file.
+     * @param {Object} parentElement - The parent element of the file input.
+     * @param {string} fileName - The name of the file.
+     * @dependency handleChangeFile, addMessage, emitCustomEvent
+     * @return void
+     * @example handleValidFile(parentElement, fileName)
+     */
+    handleValidFile(parentElement, fileName) {
+        this.addMessage(parentElement, `${fileName} uploaded successfully.`, 'green');
+        this.emitCustomEvent(parentElement, 'fileAccepted', {fileName});
+    }
 
-            // const updatedFile = {...file, fileName: fileName + }
-        const formData = new FormData()
-            console.log(file)
-        const email = JSON.parse(localStorage.getItem("user")).email
-        formData.append('file', file)
-        formData.append('email', email)
+    /**
+     * # handleInvalidFile
+     * @description Handles the event of an invalid file.
+     * @param {Object} parentElement - The parent element of the file input.
+     * @param {string} fileExtension - The file extension.
+     * @dependency handleChangeFile, addMessage, emitCustomEvent
+     * @return void
+     * @example handleInvalidFile(parentElement, fileExtension)
+     */
+    handleInvalidFile(parentElement, fileExtension) {
+        if (fileExtension === 'pdf') {
+            this.addMessage(parentElement, 'This file is not supported, please upload a JPG, JPEG or PNG file.', 'red');
+            this.emitCustomEvent(parentElement, 'fileRejected');
+        }
+    }
+
+    /**
+     * # addMessage
+     * @description Adds a validation message.
+     * @param {Object} parentElement - The parent element of the validation message.
+     * @param {string} text - The validation message.
+     * @param {string} color - The color of the validation message.
+     * @dependency handleValidFile, handleInvalidFile
+     * @return void
+     * @example addMessage(parentElement, 'Uploaded successfully.', 'green')
+     */
+    addMessage(parentElement, text, color) {
+        let textElement = document.createElement('p');
+        textElement.textContent = text;
+        textElement.style.color = color;
+        textElement.classList.add('file-type-info');
+        parentElement.appendChild(textElement);
+    }
+
+    /**
+     * # emitCustomEvent
+     * @description Emits a custom event.
+     * @param {Object} parentElement - The parent element of the event.
+     * @param {string} eventName - The name of the event.
+     * @param {Object} detail - The detail of the event.
+     * @dependency handleValidFile, handleInvalidFile
+     * @return void
+     * @example emitCustomEvent(parentElement, 'fileAccepted', {fileName: 'example.jpg'})
+     */
+    emitCustomEvent(parentElement, eventName, detail) {
+        const event = new CustomEvent(eventName, {detail: detail});
+        parentElement.dispatchEvent(event);
+    }
+
+    /**
+     * # uploadFile
+     * @description Uploads a file.
+     * @param {Object} file - The file to upload.
+     * @param {string} fileName - The name of the file.
+     * @dependency handleChangeFile
+     * @return void
+     * @example uploadFile(file, 'example.jpg')
+     */
+    uploadFile(file, fileName) {
+        const formData = new FormData();
+        const email = JSON.parse(localStorage.getItem("user")).email;
+        formData.append('file', file);
+        formData.append('email', email);
 
         this.store
             .bills()
@@ -64,46 +187,62 @@ export default class NewBill {
                     noContentType: true
                 }
             })
-                .then((FormData) => {
-                    this.billId = FormData.key
-                    this.fileUrl = formData.filePath
-                    this.fileName = FormData.fileName
+            .then(({fileUrl, key}) => {
+                this.billId = key;
+                this.fileUrl = fileUrl;
+                this.fileName = fileName;
             }).catch(error => console.error(error))
-        } catch (err) {
-            const parentDiv = e.srcElement.parentElement
-            const errorMessage = err
-            const feedbackMsg = document.createElement('div')
-            feedbackMsg.setAttribute('class', 'feedback-user')
-            feedbackMsg.innerHTML = `
-                    <p style="font-size: 12px; color:red">${errorMessage}</p>
-                `
-            parentDiv.appendChild(feedbackMsg)
-            e.target.value = ""
+    }
 
-            // console.error(err)
+    /**
+     * # handleSubmit
+     * @description Handles the event of form submission.
+     * @param {Object} event - The event object.
+     * @dependency initForm, createBillObject, updateBill
+     * @return void
+     * @example handleSubmit(event)
+     */
+    handleSubmit = (event) => {
+        event.preventDefault();
+        const email = JSON.parse(localStorage.getItem("user")).email;
+        const bill = this.createBillObject(email, event.target);
+        this.updateBill(bill); // 👈 Extracted bill creation logic to separate function
+        this.onNavigate(ROUTES_PATH['Bills'])
     }
-    }
-    handleSubmit = e => {
-        e.preventDefault()
-        console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
-        const email = JSON.parse(localStorage.getItem("user")).email
-        const bill = {
+
+    /**
+     * # createBillObject
+     * @description Creates a bill object.
+     * @param {string} email - The email of the user.
+     * @param {Object} target - The target element of the event.
+     * @dependency handleSubmit
+     * @return {Object} The bill object.
+     * @example createBillObject('example@example.com', event.target)
+     */
+    createBillObject(email, target) {  // 👈 Extracted bill creation logic to separate function
+        return {
             email,
-            type: e.target.querySelector(`select[data-testid="expense-type"]`).value,
-            name:  e.target.querySelector(`input[data-testid="expense-name"]`).value,
-            amount: parseInt(e.target.querySelector(`input[data-testid="amount"]`).value),
-            date:  e.target.querySelector(`input[data-testid="datepicker"]`).value,
-            vat: e.target.querySelector(`input[data-testid="vat"]`).value,
-            pct: parseInt(e.target.querySelector(`input[data-testid="pct"]`).value) || 20,
-            commentary: e.target.querySelector(`textarea[data-testid="commentary"]`).value,
+            type: target.querySelector(`select[data-testid="expense-type"]`).value,
+            name: target.querySelector(`input[data-testid="expense-name"]`).value,
+            amount: parseInt(target.querySelector(`input[data-testid="amount"]`).value),
+            date: target.querySelector(`input[data-testid="datepicker"]`).value,
+            vat: target.querySelector(`input[data-testid="vat"]`).value,
+            pct: parseInt(target.querySelector(`input[data-testid="pct"]`).value) || 20,
+            commentary: target.querySelector(`textarea[data-testid="commentary"]`).value,
             fileUrl: this.fileUrl,
             fileName: this.fileName,
             status: 'pending'
         }
-        this.updateBill(bill)
-        this.onNavigate(ROUTES_PATH['Bills'])
     }
 
+    /**
+     * # updateBill
+     * @description Updates a bill.
+     * @param {Object} bill - The bill to update.
+     * @dependency handleSubmit
+     * @return void
+     * @example updateBill(bill)
+     */
     // not need to cover this function by tests
     updateBill = (bill) => {
         if (this.store) {

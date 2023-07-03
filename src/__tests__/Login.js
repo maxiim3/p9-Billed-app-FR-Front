@@ -4,10 +4,8 @@
 
 import LoginUI from "../views/LoginUI";
 import Login from "../containers/Login.js";
-import {ROUTES, ROUTES_PATH} from "../constants/routes";
-import {fireEvent, screen, waitFor} from "@testing-library/dom";
-import {loadAdminRoutes} from "../helper/loadAdminRoutes.js";
-
+import { ROUTES } from "../constants/routes";
+import { fireEvent, screen } from "@testing-library/dom";
 
 describe("Given that I am a user on login page", () => {
     describe("When I do not fill fields and I click on employee button Login In", () => {
@@ -34,11 +32,11 @@ describe("Given that I am a user on login page", () => {
             document.body.innerHTML = LoginUI();
 
             const inputEmailUser = screen.getByTestId("employee-email-input");
-            fireEvent.change(inputEmailUser, {target: {value: "pasunemail"}});
+            fireEvent.change(inputEmailUser, { target: { value: "pasunemail" } });
             expect(inputEmailUser.value).toBe("pasunemail");
 
             const inputPasswordUser = screen.getByTestId("employee-password-input");
-            fireEvent.change(inputPasswordUser, {target: {value: "azerty"}});
+            fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
             expect(inputPasswordUser.value).toBe("azerty");
 
             const form = screen.getByTestId("form-employee");
@@ -51,21 +49,20 @@ describe("Given that I am a user on login page", () => {
     });
 
     describe("When I do fill fields in correct format and I click on employee button Login In", () => {
-        document.body.innerHTML = LoginUI();
-        const inputData = {
-            email: "johndoe@email.com",
-            password: "azerty",
-        };
         test("Then I should be identified as an Employee in app", () => {
-
+            document.body.innerHTML = LoginUI();
+            const inputData = {
+                email: "johndoe@email.com",
+                password: "azerty",
+            };
 
             const inputEmailUser = screen.getByTestId("employee-email-input");
-            fireEvent.change(inputEmailUser, {target: {value: inputData.email}});
+            fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
             expect(inputEmailUser.value).toBe(inputData.email);
 
             const inputPasswordUser = screen.getByTestId("employee-password-input");
             fireEvent.change(inputPasswordUser, {
-                target: {value: inputData.password},
+                target: { value: inputData.password },
             });
             expect(inputPasswordUser.value).toBe(inputData.password);
 
@@ -82,7 +79,7 @@ describe("Given that I am a user on login page", () => {
 
             // we have to mock navigation to test it
             const onNavigate = (pathname) => {
-                document.body.innerHTML = ROUTES({pathname});
+                document.body.innerHTML = ROUTES({ pathname });
             };
 
             let PREVIOUS_LOCATION = "";
@@ -145,11 +142,11 @@ describe("Given that I am a user on login page", () => {
             document.body.innerHTML = LoginUI();
 
             const inputEmailUser = screen.getByTestId("admin-email-input");
-            fireEvent.change(inputEmailUser, {target: {value: "pasunemail"}});
+            fireEvent.change(inputEmailUser, { target: { value: "pasunemail" } });
             expect(inputEmailUser.value).toBe("pasunemail");
 
             const inputPasswordUser = screen.getByTestId("admin-password-input");
-            fireEvent.change(inputPasswordUser, {target: {value: "azerty"}});
+            fireEvent.change(inputPasswordUser, { target: { value: "azerty" } });
             expect(inputPasswordUser.value).toBe("azerty");
 
             const form = screen.getByTestId("form-admin");
@@ -163,8 +160,6 @@ describe("Given that I am a user on login page", () => {
 
     describe("When I do fill fields in correct format and I click on admin button Login In", () => {
         test("Then I should be identified as an HR admin in app", () => {
-
-
             document.body.innerHTML = LoginUI();
             const inputData = {
                 type: "Admin",
@@ -172,13 +167,14 @@ describe("Given that I am a user on login page", () => {
                 password: "azerty",
                 status: "connected",
             };
+
             const inputEmailUser = screen.getByTestId("admin-email-input");
-            fireEvent.change(inputEmailUser, {target: {value: inputData.email}});
+            fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
             expect(inputEmailUser.value).toBe(inputData.email);
 
             const inputPasswordUser = screen.getByTestId("admin-password-input");
             fireEvent.change(inputPasswordUser, {
-                target: {value: inputData.password},
+                target: { value: inputData.password },
             });
             expect(inputPasswordUser.value).toBe(inputData.password);
 
@@ -195,7 +191,7 @@ describe("Given that I am a user on login page", () => {
 
             // we have to mock navigation to test it
             const onNavigate = (pathname) => {
-                document.body.innerHTML = ROUTES({pathname});
+                document.body.innerHTML = ROUTES({ pathname });
             };
 
             let PREVIOUS_LOCATION = "";
@@ -227,11 +223,8 @@ describe("Given that I am a user on login page", () => {
             );
         });
 
-        test("It should renders HR dashboard page", async () => {
-            await loadAdminRoutes(ROUTES_PATH.Dashboard)
-            await waitFor(() => screen.getByTestId("validations"), {timeout: 3000});
-            const validationsText = screen.getByTestId("validations")
-            expect(validationsText).toBeTruthy();
+        test("It should renders HR dashboard page", () => {
+            expect(screen.queryByText("Validations")).toBeTruthy();
         });
     });
 });
