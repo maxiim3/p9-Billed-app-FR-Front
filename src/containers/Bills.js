@@ -1,5 +1,5 @@
-import {ROUTES_PATH} from '../constants/routes.js'
-import {formatDate, formatStatus} from "../app/format.js"
+import { ROUTES_PATH } from '../constants/routes.js'
+import { formatDate, formatStatus } from "../app/format.js"
 import Logout from "./Logout.js"
 
 export default class {
@@ -12,7 +12,7 @@ export default class {
      * @param {Store} options.store - The Store instance to use
      * @param {Storage} options.localStorage - The global localStorage object
      */
-    constructor({document, onNavigate, store, localStorage}) {
+    constructor({ document, onNavigate, store, localStorage }) {
         this.document = document
         this.onNavigate = onNavigate
         this.store = store
@@ -22,7 +22,7 @@ export default class {
         if (iconEye) iconEye.forEach(icon => {
             icon.addEventListener('click', () => this.handleClickIconEye(icon))
         })
-        new Logout({document, localStorage, onNavigate})
+        new Logout({ document, localStorage, onNavigate })
     }
 
     /**
@@ -68,10 +68,10 @@ export default class {
                                     date: formatDate(doc.date),
                                     status: formatStatus(doc.status)
                                 }
-                            } catch (e) {
+                            } catch(e) {
                                 // if for some reason, corrupted data was introduced, we manage here failing formatDate function
                                 // log the error and return unformatted date in that case
-                                console.log(e, 'for', doc)
+                                console.log(e,'for',doc)
                                 return {
                                     ...doc,
                                     date: doc.date,

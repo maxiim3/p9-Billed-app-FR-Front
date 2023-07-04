@@ -1,5 +1,5 @@
 export const formatDate = (dateStr) => {
-  console.log("formatDate() has been called") // debug
+  // console.log("formatDate() has been called") // debug
   const date = new Date(dateStr)
   const ye = new Intl.DateTimeFormat('fr', { year: 'numeric' }).format(date)
   const mo = new Intl.DateTimeFormat('fr', { month: 'short' }).format(date)
