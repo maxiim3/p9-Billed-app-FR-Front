@@ -154,7 +154,7 @@ export default class {
         bills.forEach(bill => {
             const billElement = $(`#open-bill${bill.id}`);
 
-            billElement.off('click'); // remove all previous event listeners with off() jQwery method
+            billElement.off('click'); // clears all jQuery event listeners
             billElement.click((e) => this.handleEditTicket(e, bill, bills))
         })
 

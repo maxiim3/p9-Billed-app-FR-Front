@@ -42,8 +42,10 @@ export default class NewBill {
     initForm(document, localStorage, onNavigate) {
         const formNewBill = document.querySelector(`form[data-testid="form-new-bill"]`);
         formNewBill.addEventListener("submit", this.handleSubmit);
+
         const file = document.querySelector(`input[data-testid="file"]`);
         file.addEventListener("change", this.handleChangeFile);
+
         new Logout({document, localStorage, onNavigate});
     }
 
@@ -68,9 +70,11 @@ export default class NewBill {
             this.handleValidFile(parentElement, fileName);
         } else {
             this.handleInvalidFile(parentElement, fileExtension);
+            // reset file input when file is not valid
+            event.target.value = ""
         }
-
         this.uploadFile(file, fileName);
+
     }
 
     /**

@@ -18,8 +18,16 @@ const row = (bill) => {
     </tr>
     `)
 }
+/*
+ORIGINAL BUG
+    const rows = (data) => {
+        return (data && data.length) ? data
+            .map(bill => row(bill))
+            .join("") : ""
+}*/
 
 const rows = (data) => {
+
     return (data && data.length)
         ? data
             .sort((a, b) => new Date(b.date) - new Date(a.date))
