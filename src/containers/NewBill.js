@@ -28,7 +28,7 @@ export default class NewBill {
         this.fileUrl = null
         this.fileName = null
         this.billId = null
-        this.initForm(document, localStorage, onNavigate); // 👈 Extracted initialization to separate function
+        this.initForm(document, localStorage, onNavigate);
     }
 
     /**
@@ -62,15 +62,15 @@ export default class NewBill {
         const fileExtension = fileName.split('.').pop().toLowerCase();
 
         const parentElement = event.target.parentNode;
-        this.removeExistingMessage(parentElement);  // 👈 Extracted logic to separate function
+        this.removeExistingMessage(parentElement);
 
         if (this.isValidFileType(fileExtension)) {
-            this.handleValidFile(parentElement, fileName); // 👈 Extracted logic to separate function
+            this.handleValidFile(parentElement, fileName);
         } else {
-            this.handleInvalidFile(parentElement, fileExtension); // 👈 Extracted logic to separate function
+            this.handleInvalidFile(parentElement, fileExtension);
         }
 
-        this.uploadFile(file, fileName); // 👈 Extracted logic to separate function
+        this.uploadFile(file, fileName);
     }
 
     /**
@@ -82,7 +82,9 @@ export default class NewBill {
      * @example removeExistingMessage(parentElement)
      */
     removeExistingMessage(parentElement) {
-        const existingMessage = parentElement.querySelector('.file-type-info');
+        // const existingMessage = parentElement.querySelector('.file-type-info');
+        const existingMessage = parentElement.querySelector('[data-testid="textElement"]');
+
         if (existingMessage) {
             parentElement.removeChild(existingMessage);
         }
@@ -145,7 +147,8 @@ export default class NewBill {
         let textElement = document.createElement('p');
         textElement.textContent = text;
         textElement.style.color = color;
-        textElement.classList.add('file-type-info');
+        // textElement.classList.add('file-type-info');
+        textElement.setAttribute('data-testid', 'textElement')
         parentElement.appendChild(textElement);
     }
 
@@ -206,7 +209,7 @@ export default class NewBill {
         event.preventDefault();
         const email = JSON.parse(localStorage.getItem("user")).email;
         const bill = this.createBillObject(email, event.target);
-        this.updateBill(bill); // 👈 Extracted bill creation logic to separate function
+        this.updateBill(bill);
         this.onNavigate(ROUTES_PATH['Bills'])
     }
 
@@ -219,7 +222,7 @@ export default class NewBill {
      * @return {Object} The bill object.
      * @example createBillObject('example@example.com', event.target)
      */
-    createBillObject(email, target) {  // 👈 Extracted bill creation logic to separate function
+    createBillObject(email, target) {
         return {
             email,
             type: target.querySelector(`select[data-testid="expense-type"]`).value,
@@ -243,7 +246,7 @@ export default class NewBill {
      * @return void
      * @example updateBill(bill)
      */
-    // not need to cover this function by tests
+        // not need to cover this function by tests
     updateBill = (bill) => {
         if (this.store) {
             this.store

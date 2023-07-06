@@ -122,6 +122,7 @@ export default class {
         }
         this.updateBill(newBill)
         this.onNavigate(ROUTES_PATH['Dashboard'])
+        location.reload()
     }
 
     handleRefuseSubmit = (e, bill) => {
@@ -132,6 +133,7 @@ export default class {
         }
         this.updateBill(newBill)
         this.onNavigate(ROUTES_PATH['Dashboard'])
+        location.reload()
     }
 
     handleShowTickets(e, bills, index) {
