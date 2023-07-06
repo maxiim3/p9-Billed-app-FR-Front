@@ -6,7 +6,7 @@ Le projet backend se trouve ici: https://github.com/OpenClassrooms-Student-Cente
 
 ## Lancer le projet
 
-Clonez ce repo, installez les dépensances et lancez le projet :
+Clonez ce repo, installez les dépendances et lancez le projet :
 
 Installez live-server pour lancer un serveur local :
 
